@@ -16,7 +16,8 @@
             <property name="hibernate.use_sql_comments" value="true"/>
             <!-- 버퍼링 같은 기능. 10개 모이면 실행하라 -->
 <!--            <property name="hibernate.jdbc.batch_size" value="10"/>-->
-            <!--<property name="hibernate.hbm2ddl.auto" value="create" />-->
+            <!-- 디비 스키마 자동 생성 옵션, 개발용으로 사용됨, 운영에서 사용하면 안됨 -->
+            <property name="hibernate.hbm2ddl.auto" value="create" />
         </properties>
     </persistence-unit>
 </persistence>

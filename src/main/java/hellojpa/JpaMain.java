@@ -20,6 +20,12 @@ public class JpaMain {
 
         // 중간에 에러나면 멈추니깐 try catch 로 감싸준다
         try {
+
+
+//===================
+// 1. 영속성 관리
+//===================
+
             // insert
 //            Member member = new Member();
 //            member.setId(2L);
@@ -84,7 +90,56 @@ public class JpaMain {
 //            member.setName("zzzzzz");
             // 영속성에 등록된 객체의 값이 변경되면 자동적으로 update 실행해줌
 
-            System.out.println("================");
+            // flush, 영속성 컨텍스트의 내용을 곧바로 DB에 반영함. 1차 캐시는 변함없음
+//            Member member = new Member(200L, "member200");
+//            em.persist(member);
+//            System.out.println("================");
+//            em.flush();
+//            System.out.println("================");
+
+            // JPQL 실행하면 곧바로 플러시가 자동 실행됨, JPQL 사용 시 insert 가 있는지 조심하자
+
+            // 준영속 상태 - 영속 컨텍스트에서 분리된다
+//            em.detach(member); // 특정 엔티티를 제거함
+
+//            Member member = em.find(Member.class, 150L);
+//            em.clear(); // 영속성 컨텍스트 전체 초기화
+//            Member member2 = em.find(Member.class, 150L);
+//
+//            System.out.println("member == member2 : " + (member == member2));
+
+//===================
+// 2. 엔티티 매핑
+//===================
+            // @Table(name = "MBR") 으로 명시된 테이블 조
+//            Member member = em.find(Member.class, 150L);
+
+            Member member = new Member();
+            member.setUsername("A");
+
+            Member member2 = new Member();
+            member2.setUsername("B");
+
+            Member member3 = new Member();
+            member3.setUsername("C");
+//            member.setRoleType(RoleType.ADMIN);
+
+            // @GeneratedValue(strategy = GenerationType.IDENTITY) 때문에 곧바로 insert 실행한다.
+            // DB 에서 id 값을 받아오기위해서다
+            System.out.println("==============");
+
+            // DB SEQ = 1   |   1
+            // DB SEQ = 51  |   2
+            // DB SEQ = 51  |   3
+            em.persist(member);  //1, 51
+            em.persist(member2); //MEM
+            em.persist(member3); //MEM
+
+            System.out.println("member.getId() = " + member.getId());
+            System.out.println("member2.getId() = " + member2.getId());
+            System.out.println("member3.getId() = " + member3.getId());
+
+            System.out.println("==============");
 
             tx.commit();    // 트랜잭션이 끝나는 시점에 영속성에 등록된게 실행된다.
         } catch (Exception e) {

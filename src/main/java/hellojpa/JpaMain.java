@@ -114,32 +114,58 @@ public class JpaMain {
             // @Table(name = "MBR") 으로 명시된 테이블 조
 //            Member member = em.find(Member.class, 150L);
 
+//            Member member = new Member();
+//            member.setUsername("A");
+//
+//            Member member2 = new Member();
+//            member2.setUsername("B");
+//
+//            Member member3 = new Member();
+//            member3.setUsername("C");
+////            member.setRoleType(RoleType.ADMIN);
+//
+//            // @GeneratedValue(strategy = GenerationType.IDENTITY) 때문에 곧바로 insert 실행한다.
+//            // DB 에서 id 값을 받아오기위해서다
+//            System.out.println("==============");
+//
+//            // DB SEQ = 1   |   1
+//            // DB SEQ = 51  |   2
+//            // DB SEQ = 51  |   3
+//            em.persist(member);  //1, 51
+//            em.persist(member2); //MEM
+//            em.persist(member3); //MEM
+//
+//            System.out.println("member.getId() = " + member.getId());
+//            System.out.println("member2.getId() = " + member2.getId());
+//            System.out.println("member3.getId() = " + member3.getId());
+//
+//            System.out.println("==============");
+
+
+//===================
+// 3. 연관관계 매핑
+//===================
+            Team team = new Team();
+            team.setName("TeamA");
+            em.persist(team);
+
+            System.out.println("=================");
+
             Member member = new Member();
-            member.setUsername("A");
+            member.setUsername("member1");
+            member.setTeam(team);
+            em.persist(member);
 
-            Member member2 = new Member();
-            member2.setUsername("B");
+            Member findMember = em.find(Member.class, member.getId());
+//            Long findTeamId = findMember.getTeamId();
+//            Team findTeam = em.find(Team.class, findTeamId);
+            Team findTeam = findMember.getTeam();
 
-            Member member3 = new Member();
-            member3.setUsername("C");
-//            member.setRoleType(RoleType.ADMIN);
+            System.out.println("findTeam.getName() = " + findTeam.getName());
 
-            // @GeneratedValue(strategy = GenerationType.IDENTITY) 때문에 곧바로 insert 실행한다.
-            // DB 에서 id 값을 받아오기위해서다
-            System.out.println("==============");
-
-            // DB SEQ = 1   |   1
-            // DB SEQ = 51  |   2
-            // DB SEQ = 51  |   3
-            em.persist(member);  //1, 51
-            em.persist(member2); //MEM
-            em.persist(member3); //MEM
-
-            System.out.println("member.getId() = " + member.getId());
-            System.out.println("member2.getId() = " + member2.getId());
-            System.out.println("member3.getId() = " + member3.getId());
-
-            System.out.println("==============");
+            // 다른팀명으로 바꾸고싶으면? 팀자체를 조회해서 바꿔준다
+            Team newTeam = em.find(Team.class, 100L);
+            findMember.setTeam(newTeam);
 
             tx.commit();    // 트랜잭션이 끝나는 시점에 영속성에 등록된게 실행된다.
         } catch (Exception e) {

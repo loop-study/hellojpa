@@ -145,27 +145,54 @@ public class JpaMain {
 //===================
 // 3. 연관관계 매핑
 //===================
-            Team team = new Team();
-            team.setName("TeamA");
-            em.persist(team);
+//
+//            Team team = new Team();
+//            team.setName("TeamA");
+////            team.getMembers().add(member);
+//            em.persist(team);
+//
+//            Member member = new Member();
+//            member.setUsername("member1");
+////            member.changeTeam(team);
+//            em.persist(member);
+//
+//            // 연관관계 편의 메서드가 양쪽에 있다면? 하나만 써야한다.
+//            // 값 세팅은 방향에 상관없다. 주인쪽은 mappedBy 설정이다
+//            // 상황에 따라 주인관계가 다를 수 있다.
+////            team.addMember(member);
+//
+//            // 주석처리하면 문제가 생긴다? 실행해보자,
+//            // insert 만 되고 조회쿼리는 없다.
+//            // 아래 포이치 member size 는 0 이다!!
+//            // 아래의 코드를 Member.setTeam() 안에 넣어주자
+////            team.getMembers().add(member);
+//            em.flush();
+//            em.clear();
+//
+//            Member findMember = em.find(Member.class, member.getId());
+//
+//            // 무한루프... toString자, lombok, json 라이브러리를 조심하자
+//            System.out.println("==============");
+//            System.out.println("members = " + findMember.toString());
+//            System.out.println("==============");
 
-            System.out.println("=================");
-
-            Member member = new Member();
-            member.setUsername("member1");
-            member.setTeam(team);
-            em.persist(member);
-
-            Member findMember = em.find(Member.class, member.getId());
-//            Long findTeamId = findMember.getTeamId();
-//            Team findTeam = em.find(Team.class, findTeamId);
-            Team findTeam = findMember.getTeam();
-
-            System.out.println("findTeam.getName() = " + findTeam.getName());
-
-            // 다른팀명으로 바꾸고싶으면? 팀자체를 조회해서 바꿔준다
-            Team newTeam = em.find(Team.class, 100L);
-            findMember.setTeam(newTeam);
+            // 일대다 단방향 매핑 - 비권장... 파악하기 혼란하다...
+//            Member member = new Member();
+//            member.setUsername("member1");
+//
+//            Member member2 = new Member();
+//            member2.setUsername("member2");
+//
+//            em.persist(member);
+//            em.persist(member2);
+//
+//            Team team = new Team();
+//            team.setName("teamA");
+//            // update 실행됨
+//            team.getMembers().add(member);
+//            team.getMembers().add(member2);
+//
+//            em.persist(team);
 
             tx.commit();    // 트랜잭션이 끝나는 시점에 영속성에 등록된게 실행된다.
         } catch (Exception e) {

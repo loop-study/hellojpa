@@ -4,6 +4,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class JpaMain {
@@ -193,6 +194,35 @@ public class JpaMain {
 //            team.getMembers().add(member2);
 //
 //            em.persist(team);
+
+//===================
+// 4. 고급 매핑
+//===================
+//            Movie movie = new Movie();
+//            movie.setDirector("aaa");
+//            movie.setActor("bbb");
+//            movie.setName("JPA 와 함께 춤을");
+//            movie.setPrice(10000);
+//
+//            em.persist(movie);
+//
+//            em.flush();
+//            em.clear();
+//
+//            // InheritanceType.TABLE_PER_CLASS 의 큰 문제점... 모든 테이블 유니온해서 찾아온다...
+//            Item Item = em.find(Item.class, movie.getId());
+//            System.out.println("Item = " + Item);
+
+            Member member = new Member();
+            member.setUsername("kim");
+            member.setCreateBy("kim");
+            member.setCreateDate(LocalDateTime.now());
+
+            em.persist(member);
+
+            em.flush();
+            em.clear();
+
 
             tx.commit();    // 트랜잭션이 끝나는 시점에 영속성에 등록된게 실행된다.
         } catch (Exception e) {

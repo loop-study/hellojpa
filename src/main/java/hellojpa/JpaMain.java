@@ -1,9 +1,8 @@
 package hellojpa;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.Persistence;
+import org.hibernate.Hibernate;
+
+import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -212,17 +211,110 @@ public class JpaMain {
 //            // InheritanceType.TABLE_PER_CLASS 의 큰 문제점... 모든 테이블 유니온해서 찾아온다...
 //            Item Item = em.find(Item.class, movie.getId());
 //            System.out.println("Item = " + Item);
+//
+//            Member member = new Member();
+//            member.setUsername("kim");
+//            member.setCreateBy("kim");
+//            member.setCreateDate(LocalDateTime.now());
+//
+//            em.persist(member);
 
-            Member member = new Member();
-            member.setUsername("kim");
-            member.setCreateBy("kim");
-            member.setCreateDate(LocalDateTime.now());
+//            em.flush();
+//            em.clear();
+            
+//===================
+// 5. 프록시
+//===================
 
-            em.persist(member);
+//            Member member = new Member();
+//            member.setUsername("hello");
+//
+//            Member member2 = new Member();
+//            member2.setUsername("hello2");
+//
+//            em.persist(member);
+//            em.persist(member2);
+//
+//            em.flush();
+//            em.clear();
+//
+////            Member findMember = em.find(Member.class, member.getId());
+//            // select 쿼리가 안나가네? -> 실제 사용하는 시점에 조회됨.
+//            // id 는 위의 값을 넣어서 뭐지 알 수 있음. username 은 없어서 디비에 조회해옴
+//            Member findMember = em.getReference(Member.class, member.getId());
+//            printMember(findMember);
+//
+//            // 같은 영속성에 등록된 객체로 조회하면 같은 타입이 된다
+//            // 만약의 위에서 프록시로 조회하고 여기도 프록시로 한다면?
+//            // 사용될 떄 조회 쿼리는 한번만 나갈까?
+//            Member findMember2 = em.find(Member.class, member.getId()); // em.find -> em.getReference
+//            System.out.println("findMember2.getClass() = " + findMember2.getClass());
+////            Member findMember2 = em.find(Member.class, member2.getId());
+//            //
+//            System.out.println("findMember2 == findMember = " + (findMember2.getClass() == findMember.getClass()));
+//            System.out.println("findMember2 == findMember = " + (findMember instanceof Member));
+////            printMemberAndTeam(member);
+//
+//            Member member = new Member();
+//            member.setUsername("hello1");
+//            em.persist(member);
+//
+//            em.flush();
+//            em.clear();
+//
+//            Member refMember = em.getReference(Member.class, member.getId());
+//            System.out.println("refMember.getClass() = " + refMember.getClass()); // 프록시
+//            // 프록시 초기화 여부 확인 : PersistenceUnitUtil.isLoaded(refMember)
+//            System.out.println("isLoaded = " + emf.getPersistenceUnitUtil().isLoaded(refMember));
+//            // JPA 강제초기화 기능을 제공함, 표준은 아니다
+//            Hibernate.initialize(refMember);
+//            Team team = new Team();
+//            team.setName("team");
+//            em.persist(team);
+//
+//            Member member = new Member();
+//            member.setUsername("hello1");
+//            member.setTeam(team);
+//            em.persist(member);
+//
+//            em.flush();
+//            em.clear();
+//
+//            // member 조회가 끝나고 곧바로 team 조회가 실행됨...
+//            // JPQL 은 sql 로 번역되고 가져왔는데 필드 중에 team 이 존재하네? 즉시로딩이네? 곧바로 별도의 team 조회쿼리가 실행됨
+//            // 멤버 건수마다 각각 team 조회 쿼리가 날라감...
+////            List<Member> members = em.createQuery("select m from Member m", Member.class)
+////                    .getResultList();
+//
+//            // 정말 필요하다면 fetch 조인을 사용한다. (team은 지연로딩 상태임)
+//            // 지연 로딩 상관없이 한번에 쫘악 가져오는 쿼리
+//            List<Member> members = em.createQuery("select m from Member m join fetch m.team", Member.class)
+//                    .getResultList();
+
+
+            Child child1 = new Child();
+            Child child2 = new Child();
+
+            Parent parent = new Parent();
+            parent.addChild(child1);
+            parent.addChild(child2);
+
+            // Parent 에서 Child @ManyToOne 속성 cascade = Cascade.ALL 로 해준다
+            // 자식까지 insert 됨. 부모가 삭제되면 연관된 자식도 따라 삭제됨. (자식이 여러군데 사용되면 삭제되면 안됨.)
+            em.persist(parent);
 
             em.flush();
             em.clear();
 
+            Parent findParent = em.find(Parent.class, parent.getId());
+            // orphanRemoval = true 속성값으로 delete 쿼리 실행됨
+            // findParent.getChildList().remove(0);
+
+            // 부모가 삭제되면? 자식도 저절로 삭제됨.
+//            em.remove(parent);
+
+//            em.persist(child1);
+//            em.persist(child2);
 
             tx.commit();    // 트랜잭션이 끝나는 시점에 영속성에 등록된게 실행된다.
         } catch (Exception e) {
@@ -233,4 +325,22 @@ public class JpaMain {
 
         emf.close();
     }
+
+//    // 프록시에 대한 예시.
+//    private static void printMember(Member member) {
+//        // 멤버만 조회하고 싶다.
+//        System.out.println("before member.getClass() = " + member.getClass());
+//        System.out.println("member.getId() = " + member.getId());
+//        System.out.println("member.getUsername() = " + member.getUsername());
+//        System.out.println("after member.getClass() = " + member.getClass());
+//    }
+//
+//    private static void printMemberAndTeam(Member member) {
+//        // 멤버, 팀 모두 조회하고 싶다.
+//        String username = member.getUsername();
+//        System.out.println("username = " + username);
+//
+//        Team team = member.getTeam();
+//        System.out.println("team = " + team.getName());
+//    }
 }

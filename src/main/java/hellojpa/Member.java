@@ -25,7 +25,7 @@ public class Member extends BaseEntity {
     // 일대다 양방향 매핑... 야매 방식
     // insertable = false, updatable = false 을 넣어준다
     // -> insert, update 를 막아 읽기전용으로 만들어버람
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY) // team 객체를 프록시로 만듬. 실제 디비에선 멤버만 조회함, 디폴트 FetchType.EAGER (즉시 로딩)
     @JoinColumn(name = "TEAM_ID", insertable = false, updatable = false)
     private Team team;
 
@@ -33,9 +33,9 @@ public class Member extends BaseEntity {
 //    @JoinColumn(name = "LOCKER_ID")
 //    private Locker locker;
 
-    @OneToMany(mappedBy = "member")
-//    @JoinTable(name = "MEMBER_PRODUCT")
-    private List<MemberProduct> memberProducts = new ArrayList<>();
+//    @OneToMany(mappedBy = "member")
+////    @JoinTable(name = "MEMBER_PRODUCT")
+//    private List<MemberProduct> memberProducts = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -53,13 +53,20 @@ public class Member extends BaseEntity {
         this.username = username;
     }
 
+    public Team getTeam() {
+        return team;
+    }
 
-//    public Long getTeamId() {
-//        return teamId;
-//    }
-//
-//    public void setTeamId(Long teamId) {
-//        this.teamId = teamId;
-//    }
+    public void setTeam(Team team) {
+        this.team = team;
+    }
+
+    public Long getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(Long teamId) {
+        this.teamId = teamId;
+    }
 
 }

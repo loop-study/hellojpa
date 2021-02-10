@@ -5,6 +5,7 @@ import org.hibernate.Hibernate;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 public class JpaMain {
 
@@ -291,22 +292,22 @@ public class JpaMain {
 //            List<Member> members = em.createQuery("select m from Member m join fetch m.team", Member.class)
 //                    .getResultList();
 
-
-            Child child1 = new Child();
-            Child child2 = new Child();
-
-            Parent parent = new Parent();
-            parent.addChild(child1);
-            parent.addChild(child2);
-
-            // Parent 에서 Child @ManyToOne 속성 cascade = Cascade.ALL 로 해준다
-            // 자식까지 insert 됨. 부모가 삭제되면 연관된 자식도 따라 삭제됨. (자식이 여러군데 사용되면 삭제되면 안됨.)
-            em.persist(parent);
-
-            em.flush();
-            em.clear();
-
-            Parent findParent = em.find(Parent.class, parent.getId());
+//
+//            Child child1 = new Child();
+//            Child child2 = new Child();
+//
+//            Parent parent = new Parent();
+//            parent.addChild(child1);
+//            parent.addChild(child2);
+//
+//            // Parent 에서 Child @ManyToOne 속성 cascade = Cascade.ALL 로 해준다
+//            // 자식까지 insert 됨. 부모가 삭제되면 연관된 자식도 따라 삭제됨. (자식이 여러군데 사용되면 삭제되면 안됨.)
+//            em.persist(parent);
+//
+//            em.flush();
+//            em.clear();
+//
+//            Parent findParent = em.find(Parent.class, parent.getId());
             // orphanRemoval = true 속성값으로 delete 쿼리 실행됨
             // findParent.getChildList().remove(0);
 
@@ -315,6 +316,78 @@ public class JpaMain {
 
 //            em.persist(child1);
 //            em.persist(child2);
+//
+//            Address address = new Address("oldCity", "street", "10");
+//
+//            // 임베디드 타입 예제
+//            Member member = new Member();
+//            member.setHomeAddress(address);
+//            member.setUsername("hello1");
+////            member.setWorkPeriod(new Period());
+//            em.persist(member);
+//
+//            Address address2 = new Address("newCity", address.getStreet(), address.getZipcode());
+//            member.setHomeAddress(address2);    // 통으로 갈아끼는게 이론적으로 맞다
+//
+//            Member member2 = new Member();
+//            member2.setHomeAddress(address2);
+//            member2.setUsername("hello2");
+////            member.setWorkPeriod(new Period());
+//            em.persist(member2);
+//
+//            // 영속성으로 관리되어 서로 연관되어있으니... address 를 가진 객체는 모두 수정됨... 실무에선 이런 에러 못 잡음
+//            // 만약에 공유하 싶으면 엔티티로 해야함고
+//            // 값 복사를 권장함.
+//            member.getHomeAddress().setCity("newCity");
+
+            Address address = new Address("oldCity", "street", "10");
+
+            Member member = new Member();
+            member.setHomeAddress(address);
+            member.setUsername("member1");
+
+            member.getFavoriteFoods().add("치킨");
+            member.getFavoriteFoods().add("족발");
+            member.getFavoriteFoods().add("피자");
+
+            member.getAddressHistory().add(new AddressEntity("oldCity2", "street", "10"));
+            member.getAddressHistory().add(new AddressEntity("oldCity3", "street", "10"));
+
+            em.persist(member);
+
+            em.flush();
+            em.clear();
+
+            System.out.println("================ START ============");
+            Member findMember = em.find(Member.class, member.getId());
+//          // 조회도 지연로딩
+//            List<Address> addressHistory = findMember.getAddressHistory();
+//            for (Address address2 : addressHistory) {
+//                System.out.println("address2.getCity() = " + address2.getCity());
+//            }
+//
+//            Set<String> favoriteFoods = findMember.getFavoriteFoods();
+//            for (String favoriteFood : favoriteFoods) {
+//                System.out.println("favoriteFood = " + favoriteFood);
+//            }
+
+            // homeCity -> newCity
+            // 잘못된 방식
+//            findMember.getHomeAddress().setCity("newCity");
+            // 값 타입은 통으로 갈아껴야한다. (인스턴스를 새롭게 교체)
+//            findMember.setHomeAddress(new Address("newCity", findMember.getHomeAddress().getStreet(), findMember.getHomeAddress().getZipcode()));
+
+            // 치킨 -> 한식
+            // 단순 String 인데? 방법이 없다. 지우고 추가한다
+//            findMember.getFavoriteFoods().remove("치킨");
+//            findMember.getFavoriteFoods().add("한식");
+
+            // oldCity2 -> newOne2
+            // equals, hashcode 비교로 찾아서 삭제함, 제대로 안되면 난리남.
+            // member id 로 address 다 지우고 다시 넣네... ㄷㄷㄷㄷ 한건만 지우고 한건만 넣기가 아니네.
+//            findMember.getAddressHistory().remove(new AddressEntity("oldCity2", "street", "10"));
+//            findMember.getAddressHistory().add(new AddressEntity("newCity2", "street", "10"));
+
 
             tx.commit();    // 트랜잭션이 끝나는 시점에 영속성에 등록된게 실행된다.
         } catch (Exception e) {
